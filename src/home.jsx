@@ -49,7 +49,7 @@ export default function Home() {
         .header-nav a {
           color: white;
           font-family: 'Barlow Condensed', sans-serif;
-          font-weight: 700; font-size: 16px;
+          font-weight: 700; font-size: 32px;
           letter-spacing: 2px; text-decoration: none;
           opacity: 0.9;
           transition: opacity 0.2s;
@@ -135,6 +135,17 @@ export default function Home() {
         {/* HEADER */}
         <header className="header">
           <div className="header-logo">◀</div>
+
+        <nav className="header-nav">
+            <a href="#">SEDAPAL</a>
+          </nav>
+
+
+
+
+
+
+
           <nav className="header-nav">
             <a href="#">INFORMACIÓN</a>
             <a href="#">VISIÓN COMPARTIDA</a>
