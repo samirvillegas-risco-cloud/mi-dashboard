@@ -1,5 +1,5 @@
 const menuItems = [
-  { id: 1,  icon: "👤", label: "Consulta de clientes", ruta: "#"},
+  { id: 1,  icon: "👤", label: "Consulta de clientes", ruta: "Modulo1"},
   { id: 2,  icon: "🧾", label: "Consulta de comprobantes" },
   { id: 3,  icon: "📍", label: "Puntos de abastecimiento" },
   { id: 4,  icon: "💰", label: "Financiamiento Web" },

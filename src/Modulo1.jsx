@@ -22,7 +22,7 @@ async function rpc(fn, params = {}) {
     headers,
     body: JSON.stringify(params)
   });
-  return res.json();
+  return res.json();anio 
 }
 
 
@@ -45,8 +45,8 @@ export default function Modulo1() {
   const [opciones, setOpciones]   = useState({anios:[],zonas:[],distritos:[],tipos:[],tarifas:[]});
   const [loading, setLoading]     = useState(true);
   const [error, setError]         = useState(null);
-  const [filtros, setFiltros]     = useState({anio:"",zona:"",distrito:"",tipo:"",tarifa:""});
-  const [aplicados, setAplicados] = useState({anio:"",zona:"",distrito:"",tipo:"",tarifa:""});
+  const [filtros, setFiltros] = useState({anio:[], zona:"", distrito:"", tipo:"", tarifa:""});
+  const [aplicados, setAplicados] = useState({anio:[], zona:"", distrito:"", tipo:"", tarifa:""});
 
   // Cargar opciones de filtros
   useEffect(() => {
@@ -72,7 +72,7 @@ export default function Modulo1() {
     setError(null);
 
     const params = {
-      p_anio: aplicados.anio ? parseInt(aplicados.anio) : null,
+      p_anio: aplicados.anio.length === 1 ? parseInt(aplicados.anio[0]) : null,
       p_zona:     aplicados.zona     || null,
       p_distrito: aplicados.distrito || null,
       p_tipo:     aplicados.tipo     || null,
@@ -93,9 +93,11 @@ export default function Modulo1() {
   }, [aplicados]);
 
   // Procesar datos para el gráfico
-  const aniosEnDatos = [...new Set(grafico.map(r=>r.anio))].sort();
+ const aniosEnDatos = [...new Set(grafico.map(r => r.anio))]
+  .filter(a => aplicados.anio.length === 0 || aplicados.anio.includes(String(a)))
+  .sort();
   console.log("grafico data:", grafico);
-console.log("aniosEnDatos:", aniosEnDatos);
+  console.log("aniosEnDatos:", aniosEnDatos);
   const chartData = MESES_ORDER.map(mes => {
     const obj = { mes };
     aniosEnDatos.forEach(anio => {
@@ -202,13 +204,43 @@ console.log("aniosEnDatos:", aniosEnDatos);
 
         <div className="layout">
           <aside className="sidebar">
-            <div>
-              <div className="filter-label">Año</div>
-              <select className="filter-select" value={filtros.anio} onChange={e=>setFiltro("anio", e.target.value)}>
-                <option value="">Todos</option>
-               {opciones.anios.map(a=><option key={a} value={String(a)}>{a}</option>)}
-              </select>
-            </div>
+
+            {/*filtro para checkbox*/}
+        <div>
+          <div className="filter-label">Año</div>
+          <div style={{display:"flex", flexDirection:"column", gap:4, maxHeight:160, overflowY:"auto"}}>
+            {opciones.anios.map(a => (
+              <label key={a} style={{display:"flex", alignItems:"center", gap:6, fontSize:12, cursor:"pointer"}}>
+                <input
+                  type="checkbox"
+                  value={a}
+                  checked={filtros.anio.includes(String(a))}
+                  onChange={e => {
+                    const val = String(a);
+                    setFiltros(f => ({
+                      ...f,
+                      anio: e.target.checked
+                        ? [...f.anio, val]
+                        : f.anio.filter(x => x !== val)
+                    }));
+                  }}
+                  style={{accentColor:"#00C9FF"}}
+                />
+                {a}
+              </label>
+            ))}
+          </div>
+        </div>
+
+
+
+
+
+
+
+
+
+            
             <div>
               <div className="filter-label">Zona</div>
               <select className="filter-select" value={filtros.zona} onChange={e=>setFiltro("zona",e.target.value)}>
@@ -245,8 +277,8 @@ console.log("aniosEnDatos:", aniosEnDatos);
   setAplicados({...filtros});
 }}>APLICAR FILTROS</button>
             <button className="clear-btn" onClick={()=>{
-              setFiltros({anio:"",zona:"",distrito:"",tipo:"",tarifa:""});
-              setAplicados({anio:"",zona:"",distrito:"",tipo:"",tarifa:""});
+              setFiltros({anio:[], zona:"", distrito:"", tipo:"", tarifa:""});
+              setAplicados({anio:[], zona:"", distrito:"", tipo:"", tarifa:""});
             }}>Limpiar filtros</button>
 
             <div className="kpi-grid">
