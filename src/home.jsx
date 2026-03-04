@@ -1,5 +1,5 @@
 const menuItems = [
-  { id: 1,  icon: "👤", label: "Consulta de clientes" },
+  { id: 1,  icon: "👤", label: "Consulta de clientes", ruta: "#"},
   { id: 2,  icon: "🧾", label: "Consulta de comprobantes" },
   { id: 3,  icon: "📍", label: "Puntos de abastecimiento" },
   { id: 4,  icon: "💰", label: "Financiamiento Web" },
@@ -49,7 +49,7 @@ export default function Home() {
         .header-nav a {
           color: white;
           font-family: 'Barlow Condensed', sans-serif;
-          font-weight: 700; font-size: 32px;
+          font-weight: 700; font-size: 16px;
           letter-spacing: 2px; text-decoration: none;
           opacity: 0.9;
           transition: opacity 0.2s;
@@ -136,16 +136,6 @@ export default function Home() {
         <header className="header">
           <div className="header-logo">◀</div>
 
-        <nav className="header-nav">
-            <a href="#">SEDAPAL</a>
-          </nav>
-
-
-
-
-
-
-
           <nav className="header-nav">
             <a href="#">INFORMACIÓN</a>
             <a href="#">VISIÓN COMPARTIDA</a>
@@ -156,7 +146,7 @@ export default function Home() {
         <div className="content">
           <div className="grid">
             {menuItems.map(item => (
-              <div key={item.id} className="card">
+              <div key={item.id} className="card" onClick={() => window.location.href = item.ruta || "#"}>
                 <div className="card-icon">{item.icon}</div>
                 <div className="card-label">{item.label}</div>
               </div>
