@@ -14,7 +14,7 @@ import { CgCircleci } from "react-icons/cg";
 /*SEGMENTADORES EN CUADROS*/
 const menuItems = [
   { id: 1,  icon: <FaFileAlt/>,                  label: "01 CATASTRO DE CONEXIONES Y UNIDADES DE USO - (CON CONEXION) - TARIFAS", ruta: "Modulo1"},
-  { id: 2,  icon: <IoBookSharp/>,                label: "02 CATASTRO DE CONEXIONES Y UNIDADES DE USO - (CON CONEXIÓN) POR ESTADOS" },
+  { id: 2,  icon: <IoBookSharp/>,                label: "02 CATASTRO DE CONEXIONES Y UNIDADES DE USO - (CON CONEXIÓN) POR ESTADOS" , ruta: "Modulo2"},
   { id: 3,  icon: <TbReportSearch/>,           label: "03 CONEXIONES CON MEDIDOR CATASTRO DE CONEXIONES POR ESTADOS" },
   { id: 4,  icon: <HiOutlineDocumentCurrencyDollar/>,      label: "04 FACTURACIÓN POR SOLO AGUA - POR TIPOS DE TARIFA" },
   { id: 5,  icon: <MdCalculate/>,                 label: "05 FACTURACION POR SOLO AGUA - POR MODALIDAD" },
