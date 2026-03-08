@@ -1,16 +1,30 @@
+import { FaUsers, FaFileInvoiceDollar, FaMapMarkerAlt, FaCalculator, FaSearch, FaFileAlt, FaTruck, FaExclamationTriangle, FaHandshake, FaCalendarAlt, FaWater, FaChartBar } from "react-icons/fa";
+import { IoBookSharp } from "react-icons/io5";
+import { TbReportSearch } from "react-icons/tb";
+import { HiOutlineDocumentCurrencyDollar } from "react-icons/hi2";
+import { MdCalculate } from "react-icons/md";
+import { SiQuicklook } from "react-icons/si";
+import { TbReport } from "react-icons/tb";
+import { FaCommentsDollar } from "react-icons/fa6";
+import { BsTransparency } from "react-icons/bs";
+import { CgCircleci } from "react-icons/cg";
+
+
+
+/*SEGMENTADORES EN CUADROS*/
 const menuItems = [
-  { id: 1,  icon: "👤", label: "Consulta de clientes", ruta: "Modulo1"},
-  { id: 2,  icon: "🧾", label: "Consulta de comprobantes" },
-  { id: 3,  icon: "📍", label: "Puntos de abastecimiento" },
-  { id: 4,  icon: "💰", label: "Financiamiento Web" },
-  { id: 5,  icon: "🔍", label: "Consulta de clientes" },
-  { id: 6,  icon: "📄", label: "Consulta de comprobantes" },
-  { id: 7,  icon: "🚛", label: "Zona de distribución gratuita de agua" },
-  { id: 8,  icon: "📢", label: "Reclamo comercial virtual" },
-  { id: 9,  icon: "📚", label: "Acceso a la información publica" },
-  { id: 10, icon: "🗂️", label: "Mesa de partes virtual "},
-  { id: 11, icon: "🚰", label: "Zona de distribucuón de agua gratuita" },
-  { id: 12, icon: "📊", label: "Reclamo comercial virtual" },
+  { id: 1,  icon: <FaFileAlt/>,                  label: "01 CATASTRO DE CONEXIONES Y UNIDADES DE USO - (CON CONEXION) - TARIFAS", ruta: "Modulo1"},
+  { id: 2,  icon: <IoBookSharp/>,                label: "02 CATASTRO DE CONEXIONES Y UNIDADES DE USO - (CON CONEXIÓN) POR ESTADOS" },
+  { id: 3,  icon: <TbReportSearch/>,           label: "03 CONEXIONES CON MEDIDOR CATASTRO DE CONEXIONES POR ESTADOS" },
+  { id: 4,  icon: <HiOutlineDocumentCurrencyDollar/>,      label: "04 FACTURACIÓN POR SOLO AGUA - POR TIPOS DE TARIFA" },
+  { id: 5,  icon: <MdCalculate/>,                 label: "05 FACTURACION POR SOLO AGUA - POR MODALIDAD" },
+  { id: 6,  icon: <FaUsers/>,                label: "06 FACTURACION TOTAL IMPORTES - POR TIPOS DE TARIFA" },
+  { id: 7,  icon: <SiQuicklook/>,                  label: "07 COBRANZA TOTAL IMPORTES - POR TIPOS TARIFA" },
+  { id: 8,  icon: <TbReport/>,    label: "08 DEUDAS POR COBRAR IMPORTES - CONEXIONES POR TIPOS DE TARIFA" },
+  { id: 9,  icon: <FaCommentsDollar/>,            label: "09 DEUDAS POR COBRAR - CONEXIONES POR ANTIGÜEDAD DE MESES DEUDORES" },
+  { id: 10, icon: <FaHandshake/>,              label: "10 ACUERDOS A PLAZOS - CUOTAS DE CREDITOS POR EMITIR - POR TARIFAS"},
+  { id: 11, icon: <BsTransparency/>,                  label: "11 CATASTRO DE CONEXIONES DE ALCANTARILLADO - POR TARIFAS" },
+  { id: 12, icon: <CgCircleci/>,               label: "12 FACTURACIÓN POR SOLO ALCANTARILLADO POR TIPOS DE TARIFA" },
 ];
 
 export default function Home() {
@@ -33,7 +47,7 @@ export default function Home() {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          padding: 14px 32px;
+          padding: 14px 50px;
           background: #1565c0;
         }
         .header-logo {
@@ -63,7 +77,7 @@ export default function Home() {
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          padding: 40px 32px;
+          padding: 20px 16px;
         }
 
         /* GRID */
@@ -71,7 +85,7 @@ export default function Home() {
           display: grid;
           grid-template-columns: repeat(6, 1fr);
           gap: 16px;
-          max-width: 1100px;
+          max-width: 1400px;
           width: 100%;
         }
         @media(max-width:900px){ .grid{ grid-template-columns: repeat(3,1fr); } }
@@ -100,7 +114,8 @@ export default function Home() {
         }
         .card-icon {
           font-size: 36px;
-          filter: brightness(10);
+          color: #ffffff;
+          
         }
         .card-label {
           font-family: 'Barlow', sans-serif;
@@ -147,7 +162,7 @@ export default function Home() {
           <div className="grid">
             {menuItems.map(item => (
               <div key={item.id} className="card" onClick={() => window.location.href = item.ruta || "#"}>
-                <div className="card-icon">{item.icon}</div>
+                <div  className="card-icon">{item.icon}</div>
                 <div className="card-label">{item.label}</div>
               </div>
             ))}
@@ -156,7 +171,7 @@ export default function Home() {
 
         {/* FOOTER */}
         <div className="footer">
-          <button className="footer-btn">VER MÁS</button>
+          <button className="footer-btn">VISIÓN COMPARTIDA</button>
         </div>
       </div>
     </>
