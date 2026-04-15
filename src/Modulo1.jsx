@@ -10,7 +10,7 @@
 import { useState, useEffect, useRef } from "react";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid,
-  Tooltip, Legend, ResponsiveContainer,LabelList
+  Tooltip, Legend, ResponsiveContainer, LabelList
 } from "recharts";
 
 
@@ -23,7 +23,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const MESES_ORDER = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Set","Oct","Nov","Dic"];
 
 // Colores para las líneas del gráfico — un color por año
-const COLORS = ["#00C9FF","#FF6B6B","#FFE66D","#4ECDC4","#A78BFA","#FFA07A","#00E676","#FF6E40","#F06292","#AED581","#FFD54F"];
+const COLORS = ["#0077c8","#00a3e0","#005b9f","#4db8ff","#003d7a","#66ccff","#002855","#80d4ff","#001f3f","#99ddff","#b3e8ff"];
 
 const headers = {
   apikey: SUPABASE_KEY,
@@ -53,8 +53,8 @@ const arrIntONull = (arr) => arr.length > 0 ? arr.map(a => parseInt(a)) : null;
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
-    <div style={{background:"rgba(2,20,50,0.97)",border:"1px solid rgba(0,201,255,0.3)",borderRadius:10,padding:"10px 14px",fontSize:12,color:"#e0f4ff"}}>
-      <p style={{margin:"0 0 6px",opacity:0.6}}>{label}</p>
+    <div style={{background:"#ffffff",border:"1px solid #e0eaf4",borderRadius:10,padding:"10px 14px",fontSize:12,color:"#003d7a",boxShadow:"0 4px 16px rgba(0,61,122,0.12)"}}>
+      <p style={{margin:"0 0 6px",opacity:0.7,fontWeight:700,color:"#0077c8"}}>{label}</p>
       {payload.map((p,i)=>(
         <p key={i} style={{margin:"2px 0",color:p.color}}>
           {p.name}: <strong>{Number(p.value).toLocaleString()}</strong>
@@ -92,18 +92,18 @@ function DropdownCheck({ label, opciones, seleccionados, onChange }) {
       : `${seleccionados.length} selec.`;
 
   return (
-    <div ref={ref} style={{position:"relative"}}>
-      <div className="filter-label">{label}</div>
+    <div ref={ref} style={{position:"relative", minWidth:90}}>
+      <div className="filter-sublabel">{label}</div>
       <div onClick={() => setAbierto(a => !a)}
-        style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:"rgba(0,0,0,0.07)",border:"1px solid rgba(0,0,0,0.15)",borderRadius:8,padding:"7px 10px",fontSize:12,cursor:"pointer",color:"#000",userSelect:"none"}}>
-        <span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{textoResumen}</span>
-        <span style={{fontSize:10,transition:"transform 0.2s",display:"inline-block",transform:abierto?"rotate(180deg)":"rotate(0deg)"}}>▼</span>
+        style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:"#ffffff",border:"1.5px solid #c2d9ef",borderRadius:6,padding:"5px 9px",fontSize:12,cursor:"pointer",color:"#003d7a",userSelect:"none",transition:"border-color 0.2s",fontWeight:500,minWidth:90,gap:6}}>
+        <span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",fontSize:11}}>{textoResumen}</span>
+        <span style={{fontSize:9,transition:"transform 0.2s",display:"inline-block",transform:abierto?"rotate(180deg)":"rotate(0deg)",color:"#0077c8",flexShrink:0}}>▼</span>
       </div>
       {abierto && (
-        <div style={{position:"absolute",top:"100%",left:0,right:0,zIndex:100,background:"#fff",border:"1px solid rgba(0,0,0,0.15)",borderRadius:8,marginTop:4,padding:"8px 10px",maxHeight:160,overflowY:"auto",boxShadow:"0 4px 12px rgba(0,0,0,0.15)"}}>
+        <div style={{position:"absolute",top:"100%",left:0,zIndex:200,background:"#ffffff",border:"1.5px solid #c2d9ef",borderRadius:8,marginTop:4,padding:"8px 10px",maxHeight:180,overflowY:"auto",boxShadow:"0 8px 24px rgba(0,61,122,0.14)",minWidth:140}}>
           {opciones.map(op => (
-            <label key={op} style={{display:"flex",alignItems:"center",gap:6,fontSize:11,cursor:"pointer",color:"#000",padding:"3px 0"}}>
-              <input type="checkbox" checked={seleccionados.includes(String(op))} onChange={() => toggle(String(op))} style={{accentColor:"#1976d2"}} />
+            <label key={op} style={{display:"flex",alignItems:"center",gap:6,fontSize:11,cursor:"pointer",color:"#003d7a",padding:"3px 0",fontWeight:500}}>
+              <input type="checkbox" checked={seleccionados.includes(String(op))} onChange={() => toggle(String(op))} style={{accentColor:"#0077c8"}} />
               {op}
             </label>
           ))}
@@ -116,13 +116,15 @@ function DropdownCheck({ label, opciones, seleccionados, onChange }) {
 // ─── COMPONENTE PRINCIPAL ─────────────────────────────────────────────────────
 export default function Modulo1() {
 
-  const [grafico, setGrafico] = useState([]);
-  const [detalle, setDetalle] = useState([]);
+  const [grafico, setGrafico]   = useState([]);
+  const [detalle, setDetalle]   = useState([]);
   const [opciones, setOpciones] = useState({anios:[], zonas:[], distritos:[], tipos:[], tarifas:[]});
-  const [loading, setLoading] = useState(true);
-  const [error, setError]     = useState(null);
+  const [loading, setLoading]   = useState(true);
+  const [error, setError]       = useState(null);
   const [ordenTabla, setOrdenTabla] = useState("desc"); // desc = mayor a menor
 
+  // Estado para colapsar/expandir el ribbon de filtros
+  const [ribbonAbierto, setRibbonAbierto] = useState(true);
 
   const [filtros, setFiltros]     = useState({anio:[], zona:[], distrito:[], tipo:["CONEXION"], tarifa:[], mes:[], equipo:[]});
   const [aplicados, setAplicados] = useState({anio:[], zona:[], distrito:[], tipo:["CONEXION"], tarifa:[], mes:[], equipo:[]});
@@ -141,7 +143,7 @@ export default function Modulo1() {
     });
     rpc("get_filtros").then(rows => {
       if (!Array.isArray(rows)) return;
-        setOpciones(prev => ({
+      setOpciones(prev => ({
         ...prev,
         zonas:     [...new Set(rows.map(r=>r.zona))].filter(Boolean).sort(),
         distritos: [...new Set(rows.map(r=>r.distrito))].filter(Boolean).sort(),
@@ -159,22 +161,22 @@ export default function Modulo1() {
     setError(null);
 
     const paramsGrafico = {
-  p_anio:     null,
-  p_zona:     arrONull(aplicados.zona),
-  p_distrito: arrONull(aplicados.distrito),
-  p_tipo:     arrONull(aplicados.tipo),
-  p_tarifa:   arrONull(aplicados.tarifa),
-  p_equipo:   arrONull(aplicados.equipo),
-};
+      p_anio:     null,
+      p_zona:     arrONull(aplicados.zona),
+      p_distrito: arrONull(aplicados.distrito),
+      p_tipo:     arrONull(aplicados.tipo),
+      p_tarifa:   arrONull(aplicados.tarifa),
+      p_equipo:   arrONull(aplicados.equipo),
+    };
 
-const paramsTabla = {
-  p_anio:     null,
-  p_zona:     arrONull(aplicados.zona),
-  p_distrito: arrONull(aplicados.distrito),
-  p_tipo:     arrONull(aplicados.tipo),
-  p_tarifa:   arrONull(aplicados.tarifa),
-  p_equipo:   arrONull(aplicados.equipo),
-};
+    const paramsTabla = {
+      p_anio:     null,
+      p_zona:     arrONull(aplicados.zona),
+      p_distrito: arrONull(aplicados.distrito),
+      p_tipo:     arrONull(aplicados.tipo),
+      p_tarifa:   arrONull(aplicados.tarifa),
+      p_equipo:   arrONull(aplicados.equipo),
+    };
 
     Promise.all([
       rpc("get_tagvalor_por_mes", paramsGrafico),
@@ -219,372 +221,714 @@ const paramsTabla = {
   const tarifasUnicas = [...new Set(detalle.map(r=>r.tarifa))].filter(Boolean).sort();
 
   // Filtra el detalle por mes si hay uno seleccionado
-const detalleFiltrado = aplicados.mes.length > 0
-  ? detalle.filter(r => aplicados.mes.includes(r.mes))
-  : detalle;
+  const detalleFiltrado = aplicados.mes.length > 0
+    ? detalle.filter(r => aplicados.mes.includes(r.mes))
+    : detalle;
 
-console.log("mes aplicados:", aplicados.mes);
-console.log("total detalle filas:", detalle.length);
-console.log("años en detalle:", [...new Set(detalle.map(r=>r.anio))].sort());
+  console.log("mes aplicados:", aplicados.mes);
+  console.log("total detalle filas:", detalle.length);
+  console.log("años en detalle:", [...new Set(detalle.map(r=>r.anio))].sort());
 
-const tablaAgrupada = Object.values(
-  detalleFiltrado.reduce((acc, r) => {
-    const key = `${r.anio}`;
-    if (!acc[key]) acc[key] = { anio: r.anio };
-    acc[key][r.tarifa] = (acc[key][r.tarifa] || 0) + parseFloat(r.tagvalor || 0);
-    return acc;
-  }, {})
-).sort((a,b) => ordenTabla === "asc" ? a.anio - b.anio : b.anio - a.anio);
+  const tablaAgrupada = Object.values(
+    detalleFiltrado.reduce((acc, r) => {
+      const key = `${r.anio}`;
+      if (!acc[key]) acc[key] = { anio: r.anio };
+      acc[key][r.tarifa] = (acc[key][r.tarifa] || 0) + parseFloat(r.tagvalor || 0);
+      return acc;
+    }, {})
+  ).sort((a,b) => ordenTabla === "asc" ? a.anio - b.anio : b.anio - a.anio);
 
   // ── KPIs ────────────────────────────────────────────────────────────────────
   const totalTagValor  = detalle.reduce((acc,r) => acc + parseFloat(r.tagvalor||0), 0);
   const totalRegistros = tablaAgrupada.length;
-  
   const zonasUnicas    = new Set(detalle.map(r=>r.equipo)).size;
 
   const setFiltro = (key, val) => setFiltros(f => ({...f, [key]: val}));
+
+  // Cuenta filtros activos para mostrar badge en el botón de colapsar
+  const cantFiltrosActivos = Object.entries(aplicados)
+    .filter(([k]) => k !== "tipo")
+    .reduce((acc, [, v]) => acc + v.length, 0)
+    + (aplicados.tipo.length > 0 && !(aplicados.tipo.length === 1 && aplicados.tipo[0] === "CONEXION") ? aplicados.tipo.length : 0);
 
   // ─── RENDER ──────────────────────────────────────────────────────────────────
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Open+Sans:wght@300;400;500;600&display=swap');
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-        body{background:#1565c0;font-family:'Barlow',sans-serif;color:#fff;}
-        .root{min-height:100vh;background:#1565c0;}
-        .topbar{background:#0d47a1;display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:54px;box-shadow:0 2px 20px rgba(0,0,0,0.3);}
-        .topbar-logo{font-family:'Arial',sans-serif;font-weight:800;font-size:45px;letter-spacing:2px;color:#fff;}
-        .topbar-btn{background:transparent;border:2px solid rgba(255,255,255,0.8);color:#fff;font-family:'Arial',sans-serif;font-weight:700;font-size:14px;letter-spacing:2px;padding:6px 28px;border-radius:100px;cursor:pointer;}
-        .back-link{background:rgba(255,255,255,0.15);border:none;color:#fff;font-family:'Arial',sans-serif;font-size:15px;font-weight:700;letter-spacing:1px;padding:6px 16px;border-radius:100px;cursor:pointer;}
-        .subtitle-bar{background:#0d47a1;padding:10px 28px;font-family:'Arial',sans-serif;font-size:30px;font-weight:700;letter-spacing:1px;color:#ffffff;text-align:center;border-bottom:1px solid rgba(255,255,255,0.1);}
 
+        body{
+          background:#f0f4f8;
+          font-family:'Open Sans',sans-serif;
+          color:#1a2b3c;
+        }
+        .root{
+          min-height:100vh;
+          background:#f0f4f8;
+        }
 
-        .layout{display:flex;min-height:calc(100vh - 108px);}
-        .sidebar{width:200px;flex-shrink:0;background:#fafafa;padding:16px 14px;display:flex;flex-direction:column;gap:10px;border-radius:16px;margin:12px;overflow-y:auto;height:fit-content;max-height:calc(100vh - 130px);align-self:flex-start;}
-        .filter-label{font-family:'Arial',sans-serif;font-size:11px;font-weight:700;letter-spacing:1.5px;color:#0f172a;text-transform:uppercase;margin-bottom:3px;}
-        .apply-btn{background:#1976d2;border:none;color:#fff;font-family:'Arial',sans-serif;font-size:12px;font-weight:800;letter-spacing:2px;padding:9px;border-radius:8px;cursor:pointer;text-transform:uppercase;}
-        .apply-btn:hover{background:#1e88e5;}
-        .clear-btn{background:transparent;border:1px solid rgba(0,0,0,0.2);color:rgba(0,0,0,0.5);font-family:'Arial',sans-serif;font-size:12px;letter-spacing:1px;padding:7px;border-radius:8px;cursor:pointer;}
-        .kpi-grid{display:grid;grid-template-columns:1fr;gap:8px;margin-top:4px;}
-        .kpi-card{background:rgba(25,118,210,0.1);border:1px solid rgba(25,118,210,0.2);border-radius:10px;padding:10px 12px;text-align:center;}
-        .kpi-val{font-family:'Arial',sans-serif;font-size:20px;font-weight:800;color:#0d47a1;}
-        .kpi-lbl{font-size:10px;color:#555;text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
-        .main{flex:1;padding:20px 24px;display:flex;flex-direction:column;gap:16px;overflow:auto;}
-        .page-title{font-family:'Arial',sans-serif;font-size:20px;font-weight:800;color:#fff;letter-spacing:1px;text-align:center;width:100%;}
-        .content-row{display:grid;grid-template-columns:2fr 8fr;gap:16px;}
+        /* ── TOPBAR ── */
+        .topbar{
+          background:#ffffff;
+          display:flex;
+          align-items:center;
+          justify-content:space-between;
+          padding:0 28px;
+          height:56px;
+          box-shadow:0 2px 10px rgba(0,61,122,0.10);
+          border-bottom:3px solid #0077c8;
+          position:sticky;
+          top:0;
+          z-index:300;
+        }
+        .topbar-logo{
+          font-family:'Montserrat',sans-serif;
+          font-weight:800;
+          font-size:26px;
+          letter-spacing:3px;
+          color:#0077c8;
+          text-transform:lowercase;
+        }
+        .topbar-btn{
+          background:#0077c8;
+          border:none;
+          color:#fff;
+          font-family:'Montserrat',sans-serif;
+          font-weight:700;
+          font-size:11px;
+          letter-spacing:2px;
+          padding:7px 22px;
+          border-radius:100px;
+          cursor:pointer;
+          text-transform:uppercase;
+          transition:background 0.2s;
+        }
+        .topbar-btn:hover{background:#005b9f;}
+        .back-link{
+          background:transparent;
+          border:1.5px solid #0077c8;
+          color:#0077c8;
+          font-family:'Montserrat',sans-serif;
+          font-size:11px;
+          font-weight:700;
+          letter-spacing:1px;
+          padding:6px 16px;
+          border-radius:100px;
+          cursor:pointer;
+          transition:background 0.2s,color 0.2s;
+        }
+        .back-link:hover{background:#0077c8;color:#fff;}
+
+        /* ── SUBTITLE BAR ── */
+        .subtitle-bar{
+          background:linear-gradient(90deg,#005b9f 0%,#0077c8 60%,#00a3e0 100%);
+          padding:10px 28px;
+          font-family:'Montserrat',sans-serif;
+          font-size:14px;
+          font-weight:700;
+          letter-spacing:2px;
+          color:#ffffff;
+          text-align:center;
+          text-transform:uppercase;
+        }
+
+        /* ── RIBBON DE FILTROS ── */
+        .ribbon-wrapper{
+          background:#ffffff;
+          border-bottom:1px solid #dce8f5;
+          box-shadow:0 2px 8px rgba(0,61,122,0.06);
+          position:sticky;
+          top:56px;
+          z-index:200;
+        }
+        .ribbon-toggle-bar{
+          display:flex;
+          align-items:center;
+          justify-content:space-between;
+          padding:7px 28px;
+          cursor:pointer;
+          user-select:none;
+          border-bottom:1px solid transparent;
+          transition:border-color 0.2s;
+        }
+        .ribbon-toggle-bar.open{
+          border-bottom:1px solid #e8f0f8;
+        }
+        .ribbon-toggle-left{
+          display:flex;
+          align-items:center;
+          gap:10px;
+        }
+        .ribbon-toggle-title{
+          font-family:'Montserrat',sans-serif;
+          font-size:11px;
+          font-weight:700;
+          letter-spacing:1.5px;
+          color:#5a7a99;
+          text-transform:uppercase;
+        }
+        .ribbon-badge{
+          background:#0077c8;
+          color:#fff;
+          font-family:'Montserrat',sans-serif;
+          font-size:10px;
+          font-weight:700;
+          padding:2px 8px;
+          border-radius:20px;
+          min-width:20px;
+          text-align:center;
+        }
+        .ribbon-chevron{
+          font-size:11px;
+          color:#0077c8;
+          transition:transform 0.25s;
+        }
+        .ribbon-chevron.open{transform:rotate(180deg);}
+
+        /* Chips de filtros activos (cuando ribbon está cerrado) */
+        .active-chips{
+          display:flex;
+          align-items:center;
+          gap:5px;
+          flex-wrap:wrap;
+        }
+        .active-chip{
+          background:#e8f2fb;
+          border:1px solid #b5d4f4;
+          border-radius:20px;
+          padding:2px 9px;
+          font-size:10px;
+          font-family:'Montserrat',sans-serif;
+          font-weight:600;
+          color:#0077c8;
+          white-space:nowrap;
+        }
+
+        /* Panel de filtros expandible - CORREGIDO */
+        .ribbon-panel{
+          overflow:visible;
+          transition:max-height 0.3s ease, opacity 0.25s ease;
+          max-height:0;
+          opacity:0;
+        }
+        .ribbon-panel.open{
+          max-height:500px;
+          opacity:1;
+        }
+        .ribbon-inner{
+          padding:12px 28px 14px;
+          display:flex;
+          align-items:flex-end;
+          gap:0;
+          flex-wrap:wrap;
+        }
+
+        /* Grupos de filtros con separador */
+        .filter-group{
+          display:flex;
+          flex-direction:column;
+          gap:4px;
+          padding:0 18px 0 0;
+          border-right:1px solid #dce8f5;
+          margin-right:18px;
+        }
+        .filter-group:last-of-type{
+          border-right:none;
+          margin-right:0;
+          padding-right:0;
+        }
+        .filter-group-label{
+          font-family:'Montserrat',sans-serif;
+          font-size:9px;
+          font-weight:700;
+          letter-spacing:1.5px;
+          color:#0077c8;
+          text-transform:uppercase;
+          margin-bottom:2px;
+        }
+        .filter-group-row{
+          display:flex;
+          gap:6px;
+          align-items:flex-end;
+        }
+
+        /* Label individual dentro de cada dropdown */
+        .filter-sublabel{
+          font-family:'Montserrat',sans-serif;
+          font-size:9px;
+          font-weight:600;
+          letter-spacing:1px;
+          color:#8aa4bc;
+          text-transform:uppercase;
+          margin-bottom:3px;
+        }
+
+        /* Botones del ribbon */
+        .ribbon-actions{
+          display:flex;
+          flex-direction:column;
+          gap:6px;
+          margin-left:20px;
+          padding-left:20px;
+          border-left:1px solid #dce8f5;
+          align-self:flex-end;
+          padding-bottom:1px;
+        }
+        .apply-btn{
+          background:linear-gradient(135deg,#0077c8 0%,#005b9f 100%);
+          border:none;
+          color:#fff;
+          font-family:'Montserrat',sans-serif;
+          font-size:10px;
+          font-weight:800;
+          letter-spacing:2px;
+          padding:8px 20px;
+          border-radius:6px;
+          cursor:pointer;
+          text-transform:uppercase;
+          box-shadow:0 3px 8px rgba(0,119,200,0.25);
+          transition:box-shadow 0.2s,transform 0.1s;
+          white-space:nowrap;
+        }
+        .apply-btn:hover{box-shadow:0 5px 14px rgba(0,119,200,0.35);transform:translateY(-1px);}
+        .apply-btn:active{transform:translateY(0);}
+        .clear-btn{
+          background:transparent;
+          border:1px solid #c2d9ef;
+          color:#5a7a99;
+          font-family:'Montserrat',sans-serif;
+          font-size:10px;
+          letter-spacing:1px;
+          padding:6px 14px;
+          border-radius:6px;
+          cursor:pointer;
+          transition:border-color 0.2s,color 0.2s;
+          white-space:nowrap;
+        }
+        .clear-btn:hover{border-color:#0077c8;color:#0077c8;}
+
+        /* ── KPI BAR — fila de métricas debajo del ribbon ── */
+        .kpi-bar{
+          background:#f7fafd;
+          border-bottom:1px solid #dce8f5;
+          padding:8px 28px;
+          display:flex;
+          align-items:center;
+          gap:24px;
+        }
+        .kpi-item{
+          display:flex;
+          flex-direction:column;
+          align-items:flex-start;
+        }
+        .kpi-val{
+          font-family:'Montserrat',sans-serif;
+          font-size:18px;
+          font-weight:800;
+          color:#0077c8;
+          line-height:1;
+        }
+        .kpi-lbl{
+          font-size:9px;
+          color:#8aa4bc;
+          text-transform:uppercase;
+          letter-spacing:1px;
+          margin-top:2px;
+          font-family:'Montserrat',sans-serif;
+        }
+        .kpi-divider{
+          width:1px;
+          height:32px;
+          background:#dce8f5;
+        }
+
+        /* ── MAIN ── */
+        .main{
+          padding:20px 24px;
+          display:flex;
+          flex-direction:column;
+          gap:16px;
+        }
+
+        .content-row{
+          display:grid;
+          grid-template-columns:2fr 8fr;
+          gap:16px;
+        }
         @media(max-width:900px){.content-row{grid-template-columns:1fr;}}
-        @media(max-width:768px){.layout{flex-direction:column;}.sidebar{width:calc(100% - 24px);max-height:none;height:auto;align-self:auto;}}
-        .chart-card{background:#ffffff;border:1px solid rgba(0,0,0,0.08);border-radius:16px;padding:20px;}
-        .chart-title{font-family:'Arial',sans-serif;font-size:15px;font-weight:700;letter-spacing:1px;color:#0d47a1;margin-bottom:14px;text-align:center;}
-        .table-wrap{overflow:auto;max-height:320px;border-radius:10px;}
+        @media(max-width:768px){
+          .ribbon-inner{flex-direction:column;align-items:flex-start;}
+          .filter-group{border-right:none;border-bottom:1px solid #dce8f5;padding-bottom:10px;margin-bottom:6px;padding-right:0;}
+          .ribbon-actions{border-left:none;padding-left:0;margin-left:0;flex-direction:row;}
+        }
+
+        /* ── CARDS ── */
+        .chart-card{
+          background:#ffffff;
+          border:1px solid #dce8f5;
+          border-radius:14px;
+          padding:20px;
+          box-shadow:0 2px 10px rgba(0,61,122,0.06);
+        }
+        .chart-title{
+          font-family:'Montserrat',sans-serif;
+          font-size:12px;
+          font-weight:700;
+          letter-spacing:1px;
+          color:#003d7a;
+          margin-bottom:16px;
+          text-align:center;
+          text-transform:uppercase;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          gap:8px;
+        }
+        .chart-title::before,.chart-title::after{
+          content:'';
+          flex:1;
+          height:1px;
+          background:linear-gradient(90deg,transparent,#c2d9ef);
+        }
+        .chart-title::after{
+          background:linear-gradient(90deg,#c2d9ef,transparent);
+        }
+
+        /* ── TABLA ── */
+        .table-wrap{
+          overflow:auto;
+          max-height:320px;
+          border-radius:10px;
+          border:1px solid #dce8f5;
+        }
         table{width:100%;border-collapse:collapse;font-size:12px;}
-        thead tr{background:#e3f2fd;position:sticky;top:0;z-index:2;}
-        thead th{text-align:left;padding:10px 12px;font-family:'Arial',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#000000;white-space:nowrap;border-bottom:1px solid rgba(0,0,0,0.1);}
-        tbody tr{border-bottom:1px solid rgba(0,0,0,0.05);transition:background 0.15s;}
-        tbody tr:hover{background:rgba(25,118,210,0.05);}
-        tbody td{padding:9px 12px;white-space:nowrap;color:#000000;}
-        .tag-val{font-family:'Arial',sans-serif;font-weight:700;color:#1565c0;}
+        thead tr{
+          background:linear-gradient(135deg,#0077c8 0%,#005b9f 100%);
+          position:sticky;
+          top:0;
+          z-index:2;
+        }
+        thead th{
+          text-align:left;
+          padding:11px 14px;
+          font-family:'Montserrat',sans-serif;
+          font-size:10px;
+          font-weight:700;
+          text-transform:uppercase;
+          letter-spacing:1.2px;
+          color:#ffffff;
+          white-space:nowrap;
+        }
+        tbody tr{border-bottom:1px solid #edf2f8;transition:background 0.15s;}
+        tbody tr:nth-child(even){background:#f7fafd;}
+        tbody tr:hover{background:#e8f2fb;}
+        tbody td{padding:10px 14px;white-space:nowrap;color:#1a2b3c;font-size:12px;}
+        .tag-val{font-family:'Montserrat',sans-serif;font-weight:700;color:#0077c8;}
         tfoot tr{position:sticky;bottom:0;z-index:2;}
+
+        /* ── ESTADOS ── */
         .state-box{display:flex;flex-direction:column;align-items:center;justify-content:center;height:200px;gap:12px;opacity:0.6;}
         .state-icon{font-size:40px;}
-        .state-txt{font-size:14px;color:#000;}
-        .footer{background:#0d47a1;padding:10px 28px;font-family:'Arial',sans-serif;font-size:13px;font-weight:700;color:#90caf9;text-align:center;}
+        .state-txt{font-size:14px;color:#5a7a99;font-family:'Montserrat',sans-serif;}
+
+        /* ── FOOTER ── */
+        .footer{
+          background:linear-gradient(90deg,#005b9f 0%,#0077c8 100%);
+          padding:11px 28px;
+          font-family:'Montserrat',sans-serif;
+          font-size:11px;
+          font-weight:600;
+          color:rgba(255,255,255,0.9);
+          text-align:center;
+          letter-spacing:1px;
+        }
       `}</style>
 
       <div className="root">
 
         {/* BARRA SUPERIOR */}
         <div className="topbar">
-          <div className="topbar-logo">SEDAPAL</div>
+          <div className="topbar-logo">sedapal</div>
           <button className="topbar-btn">PRINCIPAL</button>
           <button className="back-link" onClick={()=>window.location.href="/"}>← Volver al Menú</button>
         </div>
+
         <div className="subtitle-bar">Catastro de Conexiones — TAGValor por Mes</div>
 
-        <div className="layout">
+        {/* ── RIBBON DE FILTROS ─────────────────────────────────────────────── */}
+        <div className="ribbon-wrapper">
 
-          {/* SIDEBAR */}
-          <aside className="sidebar">
-            <DropdownCheck label="Año"      opciones={opciones.anios}     seleccionados={filtros.anio}     onChange={val=>setFiltro("anio",val)} />
-            <DropdownCheck label="Mes"      opciones={MESES_ORDER}        seleccionados={filtros.mes}      onChange={val=>setFiltro("mes",val)} />
-            <DropdownCheck label="Zona"     opciones={opciones.zonas}     seleccionados={filtros.zona}     onChange={val=>setFiltro("zona",val)} />
-            <DropdownCheck label="Distrito" opciones={opciones.distritos} seleccionados={filtros.distrito} onChange={val=>setFiltro("distrito",val)} />
-            <DropdownCheck label="Tipo"     opciones={opciones.tipos}     seleccionados={filtros.tipo}     onChange={val=>setFiltro("tipo",val)} />
-            <DropdownCheck label="Tarifa"   opciones={opciones.tarifas}   seleccionados={filtros.tarifa}   onChange={val=>setFiltro("tarifa",val)} />
-            <DropdownCheck label="Equipo"   opciones={opciones.equipos || []}   seleccionados={filtros.equipo}   onChange={val=>setFiltro("equipo",val)} />
+          {/* Barra clicable para colapsar/expandir */}
+          <div
+            className={`ribbon-toggle-bar ${ribbonAbierto ? "open" : ""}`}
+            onClick={() => setRibbonAbierto(a => !a)}
+          >
+            <div className="ribbon-toggle-left">
+              <span className="ribbon-toggle-title">Filtros</span>
 
+              {/* Badge con cantidad de filtros activos (cuando está cerrado) */}
+              {!ribbonAbierto && cantFiltrosActivos > 0 && (
+                <span className="ribbon-badge">{cantFiltrosActivos} activos</span>
+              )}
 
-
-
-
-            <button className="apply-btn" onClick={()=> setAplicados({...filtros})}>
-              APLICAR FILTROS
-            </button>
-            <button className="clear-btn" onClick={()=>{
-              const vacio = {anio:[], zona:[], distrito:[], tipo:[], tarifa:[], mes:[], equipo:[]};
-              setFiltros(vacio);
-              setAplicados(vacio);
-            }}>
-              Limpiar filtros
-            </button>
-
-            <div className="kpi-grid">
-              <div style={{background:"rgba(25,118,210,0.1)",border:"2px solid #1976d2",borderRadius:"50%",width:140,height:140,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",textAlign:"center",margin:"0 auto",padding:10}}>
-                {(() => {
-                  const ultimoAnio = Math.max(...grafico.map(r => r.anio));
-                  const ultimoMes = MESES_ORDER.slice().reverse().find(m =>
-                    grafico.some(r => r.anio === ultimoAnio && r.mes === m)
-                  );
-                  const fila = grafico.find(r => r.anio === ultimoAnio && r.mes === ultimoMes);
-                  const total = fila ? parseFloat(fila.tagvalor) : 0;
-                  return (
-                    <>
-                      <div style={{fontSize:9,color:"#555",textTransform:"uppercase",letterSpacing:"1px",marginBottom:2}}>{ultimoAnio} — {ultimoMes}</div>
-                      <div style={{fontFamily:"'Arial',sans-serif",fontSize:16,fontWeight:800,color:"#0d47a1"}}>{total.toLocaleString()}</div>
-                      <div style={{fontSize:9,color:"#555",textTransform:"uppercase",letterSpacing:"1px",marginTop:2}}>Último registro</div>
-                    </>
-                  );
-                })()}
-              </div>
-              {/*<div className="kpi-card">
-                <div className="kpi-val">{totalTagValor.toLocaleString()}</div>
-                <div className="kpi-lbl">TAGValor Total</div>
-              </div>
-              <div className="kpi-card">
-  <div className="kpi-val">{zonasUnicas}</div>
-  <div className="kpi-lbl">Equipos únicos</div>
-</div>*/}
-{/*----------------segundo cuadro 
-<div className="kpi-card">
-  {(() => {
-    const ultimoAnio = Math.max(...grafico.map(r => r.anio));
-    const ultimoMes = MESES_ORDER.slice().reverse().find(m =>
-      grafico.some(r => r.anio === ultimoAnio && r.mes === m)
-    );
-    const total = grafico
-      .filter(r => r.anio === ultimoAnio && r.mes === ultimoMes)
-      .reduce((acc, r) => acc + parseFloat(r.tagvalor || 0), 0);
-    return (
-      <>
-        <div style={{fontSize:9,color:"#555",textTransform:"uppercase",letterSpacing:"1px",marginBottom:2}}>
-          {ultimoAnio} — {ultimoMes}
-        </div>
-        <div className="kpi-val" style={{fontSize:14}}>{total.toLocaleString()}</div>
-        <div className="kpi-lbl">Total último mes</div>
-      </>
-    );
-  })()}
-</div>*/}
+              {/* Chips de resumen cuando el ribbon está cerrado */}
+              {!ribbonAbierto && (
+                <div className="active-chips">
+                  {aplicados.anio.length > 0 && aplicados.anio.map(a => <span key={a} className="active-chip">{a}</span>)}
+                  {aplicados.mes.length > 0  && aplicados.mes.map(m  => <span key={m} className="active-chip">{m}</span>)}
+                  {aplicados.zona.length > 0 && <span className="active-chip">{aplicados.zona.length} zona(s)</span>}
+                  {aplicados.tipo.length > 0 && aplicados.tipo.map(t => <span key={t} className="active-chip">{t}</span>)}
+                  {aplicados.tarifa.length > 0 && <span className="active-chip">{aplicados.tarifa.length} tarifa(s)</span>}
+                  {aplicados.equipo.length > 0 && <span className="active-chip">{aplicados.equipo.length} equipo(s)</span>}
+                </div>
+              )}
             </div>
-          </aside>
 
-          {/* ÁREA PRINCIPAL */}
-          <main className="main">
-            {/* EMCABEZADO DE DIV DE GRAFICOS
-            <div className="page-title">
-              Conexiones — <span>TAGValor por Mes</span>
+            <span className={`ribbon-chevron ${ribbonAbierto ? "open" : ""}`}>▼</span>
+          </div>
 
-              AÑOS FILTRADOS
-              {aplicados.anio.length > 0 &&
-              
-                <span style={{fontSize:14, marginLeft:12, opacity:0.7}}>
-                  Año {aplicados.anio.join(", ")}
-                </span>
-              }
-            </div>*/}
+          {/* Panel de filtros (expandible) */}
+          <div className={`ribbon-panel ${ribbonAbierto ? "open" : ""}`}>
+            <div className="ribbon-inner">
 
-            {loading ? (
-              <div className="state-box"><div className="state-icon">⏳</div><div className="state-txt">Cargando datos...</div></div>
-            ) : error ? (
-              <div className="state-box"><div className="state-icon">❌</div><div className="state-txt">{error}</div></div>
-            ) : (
-              <div style={{display:"flex", flexDirection:"column", gap:16}}>
+              {/* GRUPO 1 — Período */}
+              <div className="filter-group">
+                <div className="filter-group-label">Período</div>
+                <div className="filter-group-row">
+                  <DropdownCheck label="Año"  opciones={opciones.anios}  seleccionados={filtros.anio} onChange={val=>setFiltro("anio",val)} />
+                  <DropdownCheck label="Mes"  opciones={MESES_ORDER}     seleccionados={filtros.mes}  onChange={val=>setFiltro("mes",val)} />
+                </div>
+              </div>
 
-                {/* ── FILA ARRIBA: gráfico por AÑO + tabla ── */}
-                <div className="content-row">
+              {/* GRUPO 2 — Ubicación */}
+              <div className="filter-group">
+                <div className="filter-group-label">Ubicación</div>
+                <div className="filter-group-row">
+                  <DropdownCheck label="Zona"     opciones={opciones.zonas}     seleccionados={filtros.zona}     onChange={val=>setFiltro("zona",val)} />
+                  <DropdownCheck label="Distrito"  opciones={opciones.distritos} seleccionados={filtros.distrito} onChange={val=>setFiltro("distrito",val)} />
+                </div>
+              </div>
 
-                  
+              {/* GRUPO 3 — Clasificación */}
+              <div className="filter-group">
+                <div className="filter-group-label">Clasificación</div>
+                <div className="filter-group-row">
+                  <DropdownCheck label="Tipo"   opciones={opciones.tipos}        seleccionados={filtros.tipo}   onChange={val=>setFiltro("tipo",val)} />
+                  <DropdownCheck label="Tarifa" opciones={opciones.tarifas}       seleccionados={filtros.tarifa} onChange={val=>setFiltro("tarifa",val)} />
+                  <DropdownCheck label="Equipo" opciones={opciones.equipos || []} seleccionados={filtros.equipo} onChange={val=>setFiltro("equipo",val)} />
+                </div>
+              </div>
 
-                  {/* TABLA */}
-                  <div className="chart-card">
-                    <div className="chart-title">Resumen — Año / Tarifa</div>
+              {/* ACCIONES */}
+              <div className="ribbon-actions">
+                <button className="apply-btn" onClick={()=> setAplicados({...filtros})}>
+                  APLICAR
+                </button>
+                <button className="clear-btn" onClick={()=>{
+                  const vacio = {anio:[], zona:[], distrito:[], tipo:[], tarifa:[], mes:[], equipo:[]};
+                  setFiltros(vacio);
+                  setAplicados(vacio);
+                }}>
+                  Limpiar
+                </button>
+              </div>
 
-                    {/* DESCARGAR ARCHIVOS DE LA TABLA
-                    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14}}>
-                      <div className="chart-title" style={{margin:0}}>Resumen — Año / Tarifa</div>
-                      <button onClick={() => {
-                        const headers = ["Año", ...tarifasUnicas, "TOTAL"];
-                        const filas = tablaAgrupada.map(row => [
-                          row.anio,
-                          ...tarifasUnicas.map(t => row[t] || 0),
-                          tarifasUnicas.reduce((acc,t) => acc + (row[t]||0), 0)
-                        ]);
-                        const csv = [headers, ...filas].map(r => r.join(",")).join("\n");
-                        const blob = new Blob([csv], {type:"text/csv"});
-                        const url = URL.createObjectURL(blob);
-                        const a = document.createElement("a");
-                        a.href = url;
-                        a.download = "resumen_anio_tarifa.csv";
-                        a.click();
-                        URL.revokeObjectURL(url);
-                      }} style={{background:"#1976d2",border:"none",color:"#fff",fontFamily:"'Barlow Condensed',sans-serif",fontSize:12,fontWeight:700,letterSpacing:1,padding:"6px 14px",borderRadius:8,cursor:"pointer"}}>
-                        ⬇ CSV
-                      </button>
-                    </div>*/}
+            </div>
+          </div>
+        </div>
+        {/* ── FIN RIBBON ───────────────────────────────────────────────────── */}
 
-                    {tablaAgrupada.length === 0 ? (
-                      <div className="state-box"><div className="state-icon">📭</div><div className="state-txt">Sin datos</div></div>
-                    ) : (
-                      <div className="table-wrap">
-                        <table>
-                          <thead>
-                            <tr>
-                              <th onClick={() => setOrdenTabla(o => o === "asc" ? "desc" : "asc")}
-                              style={{cursor:"pointer", userSelect:"none"}}>
-                              AÑO{ordenTabla === "asc" ? "▲" : "▼"}</th>
+        {/* ── KPI BAR ─────────────────────────────────────────────────────── */}
+        <div className="kpi-bar">
+          {/* KPI — Último registro */}
+          {grafico.length > 0 && (() => {
+            const ultimoAnio = Math.max(...grafico.map(r => r.anio));
+            const ultimoMes = MESES_ORDER.slice().reverse().find(m =>
+              grafico.some(r => r.anio === ultimoAnio && r.mes === m)
+            );
+            const fila = grafico.find(r => r.anio === ultimoAnio && r.mes === ultimoMes);
+            const total = fila ? parseFloat(fila.tagvalor) : 0;
+            return (
+              <>
+                <div className="kpi-item">
+                  <div className="kpi-val">{total.toLocaleString()}</div>
+                  <div className="kpi-lbl">Último registro — {ultimoAnio} {ultimoMes}</div>
+                </div>
+                <div className="kpi-divider" />
+              </>
+            );
+          })()}
 
+          {/* Años aplicados como chips informativos */}
+          {aplicados.anio.length > 0 && (
+            <div style={{display:"flex",alignItems:"center",gap:6,marginLeft:"auto"}}>
+              <span style={{fontSize:10,color:"#8aa4bc",fontFamily:"'Montserrat',sans-serif",fontWeight:600,letterSpacing:"1px",textTransform:"uppercase"}}>Años:</span>
+              {aplicados.anio.map(a => (
+                <span key={a} style={{background:"#e8f2fb",border:"1px solid #b5d4f4",borderRadius:20,padding:"2px 10px",fontSize:11,fontFamily:"'Montserrat',sans-serif",fontWeight:700,color:"#0077c8"}}>{a}</span>
+              ))}
+            </div>
+          )}
+        </div>
+        {/* ── FIN KPI BAR ──────────────────────────────────────────────────── */}
 
-                              {tarifasUnicas.map(t=><th key={t}>{t}</th>)}
-                              <th style={{background:"#e3f2fd",color:"#000000"}}>TOTAL</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {tablaAgrupada.map((row,i)=>(
-                              <tr key={i}>
-                                <td style={{opacity:0.7, fontWeight:700}}>{row.anio}</td>
-                               {tarifasUnicas.map(t=>(
-                                  <td key={t}>
-                                    {row[t]
-                                      ? <span className="tag-val">{Number(row[t]).toLocaleString()}</span>
-                                      : <span style={{opacity:0.3}}>—</span>
-                                    }
-                                  </td>
-                                ))}
+        {/* ── ÁREA PRINCIPAL ───────────────────────────────────────────────── */}
+        <main className="main">
 
-                                 {/*total de las filas diseño*/}   
-                                <td style={{background:"#1565c0",padding:"9px 12px"}}>
-                                  <span style={{fontFamily:"'Arial",fontWeight:800,color:"#fbfdff",fontSize:11}}>
-                                    {Number(tarifasUnicas.reduce((acc,t) => acc + (row[t]||0), 0)).toLocaleString()}
-                                  </span>
-                                </td>
-                                </tr>
-                           
-                            ))}
-                          </tbody>
-                          {/* Totales fijos abajo 
-                          <tfoot>
-                            <tr style={{background:"#1565c0"}}>
-                              <td style={{color:"#ffffff",fontFamily:"'Arial',sans-serif",fontSize:11,fontWeight:800,padding:"10px 12px"}}>TOTAL</td>
+          {loading ? (
+            <div className="state-box"><div className="state-icon">⏳</div><div className="state-txt">Cargando datos...</div></div>
+          ) : error ? (
+            <div className="state-box"><div className="state-icon">❌</div><div className="state-txt">{error}</div></div>
+          ) : (
+            <div style={{display:"flex",flexDirection:"column",gap:16}}>
+
+              {/* ── FILA ARRIBA: gráfico por AÑO + tabla ── */}
+              <div className="content-row">
+
+                {/* TABLA */}
+                <div className="chart-card">
+                  <div className="chart-title">Resumen — Año / Tarifa</div>
+
+                  {tablaAgrupada.length === 0 ? (
+                    <div className="state-box"><div className="state-icon">📭</div><div className="state-txt">Sin datos</div></div>
+                  ) : (
+                    <div className="table-wrap">
+                      <table>
+                        <thead>
+                          <tr>
+                            <th
+                              onClick={() => setOrdenTabla(o => o === "asc" ? "desc" : "asc")}
+                              style={{cursor:"pointer",userSelect:"none"}}
+                            >
+                              AÑO {ordenTabla === "asc" ? "▲" : "▼"}
+                            </th>
+                            {tarifasUnicas.map(t=><th key={t}>{t}</th>)}
+                            <th style={{background:"rgba(0,0,0,0.15)"}}>TOTAL</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {tablaAgrupada.map((row,i)=>(
+                            <tr key={i}>
+                              <td style={{fontFamily:"'Montserrat',sans-serif",fontWeight:700,color:"#003d7a"}}>{row.anio}</td>
                               {tarifasUnicas.map(t=>(
-                                <td key={t} style={{color:"#ffffff",fontFamily:"'Arial',sans-serif",fontSize:11,fontWeight:800,padding:"10px 12px"}}>
-                                  {Number(tablaAgrupada.reduce((acc, row) => acc + (row[t] || 0), 0)).toLocaleString()}
+                                <td key={t}>
+                                  {row[t]
+                                    ? <span className="tag-val">{Number(row[t]).toLocaleString()}</span>
+                                    : <span style={{opacity:0.3,color:"#5a7a99"}}>—</span>
+                                  }
                                 </td>
                               ))}
 
-                              {/*Total de dils*/}
-                              {/*
-                              <td style={{color:"#ffffff",fontFamily:"Arial',sans-serif",fontSize:13,fontWeight:800,padding:"10px 12px"}}>
-                              {Number(tablaAgrupada.reduce((acc, row) => 
-                                acc + tarifasUnicas.reduce((a,t) => a + (row[t]||0), 0), 0x 
-                              )).toLocaleString()}
+                              <td style={{background:"linear-gradient(135deg,#0077c8,#005b9f)",padding:"10px 14px"}}>
+                                <span style={{fontFamily:"'Montserrat',sans-serif",fontWeight:800,color:"#ffffff",fontSize:12}}>
+                                  {Number(tarifasUnicas.reduce((acc,t) => acc + (row[t]||0), 0)).toLocaleString()}
+                                </span>
                               </td>
                             </tr>
-                          </tfoot>*/}
-                        </table>
-                      </div>
-                    )}
-                  </div>
-                  {/* GRÁFICO POR AÑO */}
-                  <div className="chart-card">
-                    <div className="chart-title">
-                      TAGValor por Año {mesSeleccionado ? `— ${mesSeleccionado}` : "— Todos los meses"}
+                          ))}
+                        </tbody>
+                      </table>
                     </div>
-                    {chartAnios.every(r => r.valor === 0) ? (
-                      <div className="state-box"><div className="state-icon">📭</div><div className="state-txt">Sin datos</div></div>
-                    ) : (
-                      <ResponsiveContainer width="100%" height={280}>
-                       <LineChart data={chartAnios} margin={{top:50, right:50, left:30, bottom:5}}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" />
-                          <XAxis dataKey="anio" tick={{fill:"#000000", fontSize:10}} axisLine={false} tickLine={false} />
-                          <YAxis hide={true} />
-                          <Tooltip content={<CustomTooltip/>} />
-                          <Line type="monotone" dataKey="valor" name="TAGValor"
-                            stroke="#1976d2" strokeWidth={2} dot={{r:4}} activeDot={{r:6}}
-                            label={{position:"insideTop", fontSize:11, fill:"#000000", formatter: v => v > 0 ? v.toLocaleString() : ""}}
-                          />
-                        </LineChart>
-                      </ResponsiveContainer>
-                    )}
-                  </div>
+                  )}
+                </div>
 
-                </div>{/* fin fila arriba */}
-
-                {/* ── FILA ABAJO: gráfico por MES — ancho completo ── */}
+                {/* GRÁFICO POR AÑO */}
                 <div className="chart-card">
                   <div className="chart-title">
-                    TAGValor por Mes {aplicados.anio.length > 0 ? `— ${aplicados.anio.join(", ")}` : "— Todos los años"}
+                    TAGValor por Año {mesSeleccionado ? `— ${mesSeleccionado}` : "— Todos los meses"}
                   </div>
-                  {chartData.length === 0 ? (
+                  {chartAnios.every(r => r.valor === 0) ? (
                     <div className="state-box"><div className="state-icon">📭</div><div className="state-txt">Sin datos</div></div>
                   ) : (
-                    <ResponsiveContainer width="100%" height={300}>
+                    <ResponsiveContainer width="100%" height={280}>
+                      <LineChart data={chartAnios} margin={{top:50,right:50,left:30,bottom:5}}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,61,122,0.08)" />
+                        <XAxis dataKey="anio" tick={{fill:"#5a7a99",fontSize:10,fontFamily:"'Montserrat',sans-serif"}} axisLine={false} tickLine={false} />
+                        <YAxis hide={true} />
+                        <Tooltip content={<CustomTooltip/>} />
+                        <Line
+                          type="monotone"
+                          dataKey="valor"
+                          name="TAGValor"
+                          stroke="#0077c8"
+                          strokeWidth={2.5}
+                          dot={{r:5,fill:"#0077c8",strokeWidth:2,stroke:"#fff"}}
+                          activeDot={{r:7}}
+                          label={{position:"insideTop",fontSize:11,fill:"#003d7a",fontFamily:"'Montserrat',sans-serif",fontWeight:700,formatter: v => v > 0 ? v.toLocaleString() : ""}}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  )}
+                </div>
+
+              </div>{/* fin fila arriba */}
+
+              {/* ── FILA ABAJO: gráfico por MES — ancho completo ── */}
+              <div className="chart-card">
+                <div className="chart-title">
+                  TAGValor por Mes {aplicados.anio.length > 0 ? `— ${aplicados.anio.join(", ")}` : "— Todos los años"}
+                </div>
+                {chartData.length === 0 ? (
+                  <div className="state-box"><div className="state-icon">📭</div><div className="state-txt">Sin datos</div></div>
+                ) : (
+                  <ResponsiveContainer width="100%" height={300}>
                     <LineChart data={chartData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" vertical={false} />
-                      <XAxis 
-                        dataKey="mes" 
-                        scale="point" 
-                        padding={{ left: 50, right: 50 }} 
-                        tick={{fill:"#000000", fontSize:11}} 
-                        axisLine={false} 
-                        tickLine={false} 
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,61,122,0.08)" vertical={false} />
+                      <XAxis
+                        dataKey="mes"
+                        scale="point"
+                        padding={{left:50,right:50}}
+                        tick={{fill:"#5a7a99",fontSize:11,fontFamily:"'Montserrat',sans-serif"}}
+                        axisLine={false}
+                        tickLine={false}
                       />
-                      <YAxis 
-                        // Ajuste para separar líneas verticalmente
-                        domain={['dataMin - 20000', 'dataMax + 20000']} 
-                        tick={{fill:"#000000", fontSize:10}} 
-                        axisLine={false} 
-                        tickLine={false} 
-                        tickFormatter={v => v.toLocaleString()} 
+                      <YAxis
+                        domain={['dataMin - 20000','dataMax + 20000']}
+                        tick={{fill:"#5a7a99",fontSize:10,fontFamily:"'Montserrat',sans-serif"}}
+                        axisLine={false}
+                        tickLine={false}
+                        tickFormatter={v => v.toLocaleString()}
                       />
                       <Tooltip content={<CustomTooltip/>} />
-                      <Legend />
+                      <Legend wrapperStyle={{fontFamily:"'Montserrat',sans-serif",fontSize:12,color:"#003d7a"}} />
                       {aniosEnDatos.map((anio, i) => (
-                    <Line 
-                      key={anio} 
-                      type="monotone" 
-                      dataKey={`${anio}`} 
-                      name={`${anio}`}
-                      stroke={COLORS[i % COLORS.length]} 
-                      strokeWidth={3} 
-                      dot={{ r: 4 }} 
-                      activeDot={{ r: 6 }}
-                    >
-                    <LabelList 
-                          dataKey={`${anio}`} 
-                          position="top"   // "top" es lo mejor para que no tape la línea
-                          offset={8}       // Baja de 15 a 8 para que esté más cerca del punto
-                          style={{ 
-                            fontSize: '10px', 
-                            fill: '#333', 
-                            fontWeight: 'bold',
-                            textShadow: '0px 0px 2px white' // Tip: añade un pequeño borde blanco para que se lea mejor sobre las líneas
-                          }}
-                          formatter={(val) => (val ? Number(val).toLocaleString() : '')} 
-                        />
-                    </Line>
-                  ))}
+                        <Line
+                          key={anio}
+                          type="monotone"
+                          dataKey={`${anio}`}
+                          name={`${anio}`}
+                          stroke={COLORS[i % COLORS.length]}
+                          strokeWidth={2.5}
+                          dot={{r:4,strokeWidth:2,stroke:"#fff"}}
+                          activeDot={{r:6}}
+                        >
+                          <LabelList
+                            dataKey={`${anio}`}
+                            position="top"
+                            offset={8}
+                            style={{
+                              fontSize:"10px",
+                              fill:"#003d7a",
+                              fontWeight:"bold",
+                              fontFamily:"'Montserrat',sans-serif",
+                              textShadow:"0px 0px 3px white"
+                            }}
+                            formatter={(val) => (val ? Number(val).toLocaleString() : "")}
+                          />
+                        </Line>
+                      ))}
                     </LineChart>
                   </ResponsiveContainer>
-                                    )}
-                                  </div>
+                )}
+              </div>
 
-                                </div>
-                              )}
-                            </main>
-                          </div>
+            </div>
+          )}
+        </main>
+        {/* ── FIN ÁREA PRINCIPAL ───────────────────────────────────────────── */}
 
-                          <div className="footer">SEDAPAL — Catastro de Conexiones</div>
-                        </div>
-                      </>
-                    );
+        <div className="footer">SEDAPAL — Catastro de Conexiones · Sistema de Gestión Comercial</div>
+      </div>
+    </>
+  );
 }
